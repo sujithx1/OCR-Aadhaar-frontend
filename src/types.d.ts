@@ -14,3 +14,9 @@
 export interface ErrorPlayload{
   message?:string
 }
+
+export interface AdharSendData{
+  frontImage:File,
+  backImage:File
+
+}

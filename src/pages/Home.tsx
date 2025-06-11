@@ -1,14 +1,15 @@
 import { useState } from "react";
-import { api } from "../api/axios";
+// import { api } from "../api/axios";
 import Result from "./Result";
-import type { AadhaarData } from "../types";
+import type { AadhaarData, AdharSendData } from "../types";
 import { toast } from "react-toastify";
-import { isAxiosError } from "axios";
+// import { isAxiosError } from "axios";
+import { ocrPost } from "../reducers/apicalls";
+import { validateFile } from "../configs/validater";
 
 
 
-const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/jpg"];
-const MAX_FILE_SIZE_MB = 5;
+
 
 const sanitizeFileName = (name: string) => {
   return name.replace(/[^a-zA-Z0-9.\-_]/g, "_");
@@ -22,16 +23,7 @@ const Uploader = () => {
 
   const [error, setError] = useState<string | null>(null);
 
-  const validateFile = (file: File): string | null => {
-    if (!ALLOWED_TYPES.includes(file.type)) {
-      return "Only JPG, JPEG, PNG files are allowed.";
-    }
-    if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
-      return `File size should be less than ${MAX_FILE_SIZE_MB}MB.`;
-    }
-    return null;
-  };
-
+ 
 
 
     const handleFileChange = (
@@ -50,7 +42,6 @@ const Uploader = () => {
       return;
     }
 
-    // Optionally sanitize the file name
     const sanitized = new File([file], sanitizeFileName(file.name), {
       type: file.type,
     });
@@ -63,27 +54,24 @@ const Uploader = () => {
   const handleUpload = async () => {
     if (!frontFile || !backFile) return toast.error("Both images are required!");
 
-    const formData = new FormData();
-    formData.append("frontImage", frontFile);
-    formData.append("backImage", backFile);
+   const data:AdharSendData={
+    frontImage:frontFile,
+    backImage:backFile
 
-    try {
+
+   }
       setLoading(true);
-      const res = await api.post("/ocr", formData);
-      setOcrResult(res.data.data);
-    } catch (error) {
-      if (isAxiosError(error) ) {
-        console.log(error);
-        
-        const message = error.response?.data?.error || "Upload failed. Try again.";
-        toast.error(`❌ ${message}`);
-        
-        console.error(error);
+      const res =await ocrPost(data)
+      if(res){
 
+        setOcrResult(res.data);
+
+        
       }
-    } finally {
-      setLoading(false);
-    }
+
+      setLoading(false)
+
+      
   };
 
   return (

@@ -12,6 +12,7 @@ function App() {
      <Routes>
       <Route path="/" element={<LandingPage/>} />
       <Route path="/ocr" element={<Home />} />
+   
     </Routes>
     
           <ToastContainer position="top-right" autoClose={3000} />
